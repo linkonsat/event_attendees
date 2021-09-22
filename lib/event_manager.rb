@@ -42,6 +42,14 @@ while hours.length >= 1 do
 end
 hour_count
 end
+
+def clean_days(days)
+  split_time = days.split(' ')
+  day_year_month_split = split_time[0].split('/')
+  corrected_days = day_year_month_split[2] + '/' + day_year_month_split[0]+ '/' + day_year_month_split[1]
+  corrected_date = corrected_days + ' ' + split_time[1]
+  Date.parse(corrected_date).cwday
+end
 def legislators_by_zipcode(zip)
   civic_info = Google::Apis::CivicinfoV2::CivicInfoService.new
   civic_info.key = 'AIzaSyClRzDqDh5MsXwnCWi0kOiiBivP6JsSyBw'
@@ -78,6 +86,7 @@ contents = CSV.open(
 template_letter = File.read('form_letter.erb')
 erb_template = ERB.new template_letter
 hours = []
+days = []
 contents.each do |row|
   id = row[0]
   name = row[:first_name]
@@ -85,7 +94,7 @@ contents.each do |row|
   legislators = legislators_by_zipcode(zipcode)
   phone_number = clean_phone_number(row[:homephone])
   hours.push(clean_dates(row[:regdate]).hour)
-  
+  days.push(clean_days(row[:regdate]))
   #So for peak registration hours lets break down the steps
   #1. first we need to set up a counter that says how many were in x hour 
   #2 Then we need multiple counter to store the different amounts between hours.
@@ -97,6 +106,14 @@ contents.each do |row|
    
   
 end
+
+def show_most_registered_hours(hours)
 counter = find_most_repeated(hours)
 sorted_counter = counter[1,counter.length].sort! { |a, b| b.values[0] <=> a.values[0] }
-p sorted_counter.unshift({ "hours" => "hour amounts"})
+sorted_counter.unshift({ "hours" => "hour amounts"})
+end
+
+def show_most_registered_days(days)
+  p sorted_days = days.sort! { |a, b| b <=> a}
+end
+
